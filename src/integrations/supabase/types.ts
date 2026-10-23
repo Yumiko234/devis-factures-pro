@@ -14,13 +14,296 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          address: string
+          city: string
+          contact_name: string
+          country: string
+          created_at: string
+          email: string
+          id: string
+          is_professional: boolean
+          name: string
+          notes: string
+          phone: string
+          postal_code: string
+          siren: string
+          user_id: string
+          vat_number: string
+        }
+        Insert: {
+          address?: string
+          city?: string
+          contact_name?: string
+          country?: string
+          created_at?: string
+          email?: string
+          id?: string
+          is_professional?: boolean
+          name: string
+          notes?: string
+          phone?: string
+          postal_code?: string
+          siren?: string
+          user_id?: string
+          vat_number?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          contact_name?: string
+          country?: string
+          created_at?: string
+          email?: string
+          id?: string
+          is_professional?: boolean
+          name?: string
+          notes?: string
+          phone?: string
+          postal_code?: string
+          siren?: string
+          user_id?: string
+          vat_number?: string
+        }
+        Relationships: []
+      }
+      company_settings: {
+        Row: {
+          address: string
+          ape_code: string
+          bic: string
+          city: string
+          created_at: string
+          email: string
+          footer_note: string
+          iban: string
+          insurance: string
+          late_penalty: string
+          legal_mention: string
+          name: string
+          owner_name: string
+          payment_terms_days: number
+          phone: string
+          postal_code: string
+          quote_validity_days: number
+          rcs_rm: string
+          siret: string
+          updated_at: string
+          user_id: string
+          website: string
+        }
+        Insert: {
+          address?: string
+          ape_code?: string
+          bic?: string
+          city?: string
+          created_at?: string
+          email?: string
+          footer_note?: string
+          iban?: string
+          insurance?: string
+          late_penalty?: string
+          legal_mention?: string
+          name?: string
+          owner_name?: string
+          payment_terms_days?: number
+          phone?: string
+          postal_code?: string
+          quote_validity_days?: number
+          rcs_rm?: string
+          siret?: string
+          updated_at?: string
+          user_id: string
+          website?: string
+        }
+        Update: {
+          address?: string
+          ape_code?: string
+          bic?: string
+          city?: string
+          created_at?: string
+          email?: string
+          footer_note?: string
+          iban?: string
+          insurance?: string
+          late_penalty?: string
+          legal_mention?: string
+          name?: string
+          owner_name?: string
+          payment_terms_days?: number
+          phone?: string
+          postal_code?: string
+          quote_validity_days?: number
+          rcs_rm?: string
+          siret?: string
+          updated_at?: string
+          user_id?: string
+          website?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          client_id: string | null
+          client_snapshot: Json | null
+          company_snapshot: Json | null
+          created_at: string
+          due_date: string | null
+          finalized_at: string | null
+          id: string
+          issue_date: string
+          items: Json
+          notes: string
+          number: string | null
+          operation_category: string
+          paid_at: string | null
+          payment_method: string
+          service_date: string
+          source_id: string | null
+          status: string
+          total: number
+          type: string
+          updated_at: string
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          client_snapshot?: Json | null
+          company_snapshot?: Json | null
+          created_at?: string
+          due_date?: string | null
+          finalized_at?: string | null
+          id?: string
+          issue_date?: string
+          items?: Json
+          notes?: string
+          number?: string | null
+          operation_category?: string
+          paid_at?: string | null
+          payment_method?: string
+          service_date?: string
+          source_id?: string | null
+          status?: string
+          total?: number
+          type: string
+          updated_at?: string
+          user_id?: string
+          valid_until?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          client_snapshot?: Json | null
+          company_snapshot?: Json | null
+          created_at?: string
+          due_date?: string | null
+          finalized_at?: string | null
+          id?: string
+          issue_date?: string
+          items?: Json
+          notes?: string
+          number?: string | null
+          operation_category?: string
+          paid_at?: string | null
+          payment_method?: string
+          service_date?: string
+          source_id?: string | null
+          status?: string
+          total?: number
+          type?: string
+          updated_at?: string
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          kind: string
+          name: string
+          unit: string
+          unit_price: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          kind?: string
+          name: string
+          unit?: string
+          unit_price?: number
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          kind?: string
+          name?: string
+          unit?: string
+          unit_price?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      finalize_document: {
+        Args: { _doc_id: string }
+        Returns: {
+          client_id: string | null
+          client_snapshot: Json | null
+          company_snapshot: Json | null
+          created_at: string
+          due_date: string | null
+          finalized_at: string | null
+          id: string
+          issue_date: string
+          items: Json
+          notes: string
+          number: string | null
+          operation_category: string
+          paid_at: string | null
+          payment_method: string
+          service_date: string
+          source_id: string | null
+          status: string
+          total: number
+          type: string
+          updated_at: string
+          user_id: string
+          valid_until: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "documents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
