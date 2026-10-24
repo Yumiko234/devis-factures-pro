@@ -30,11 +30,7 @@ interface Props {
 export function DocumentPreview(p: Props) {
   const c = p.company ?? {};
   const cl = p.client ?? {};
-  const mentions = legalMentions({
-    type: p.type,
-    clientIsProfessional: cl.is_professional ?? true,
-    latePenalty: c.late_penalty || "trois fois le taux d'intérêt légal",
-  });
+  const mentions = legalMentions({ type: p.type });
 
   return (
     <div className="print-sheet shadow-paper mx-auto flex min-h-[297mm] w-full max-w-[210mm] flex-col bg-paper p-[14mm] text-[12px] leading-relaxed text-ink">
@@ -60,8 +56,8 @@ export function DocumentPreview(p: Props) {
           <p className="mt-3">Date d'émission : {formatDate(p.issueDate)}</p>
           {p.type === "quote" && <p>Valable jusqu'au : {formatDate(p.validUntil)}</p>}
           {p.type === "invoice" && <p>Échéance : {formatDate(p.dueDate)}</p>}
-          {p.sourceNumber && p.type === "credit_note" && <p>Avoir sur facture : {p.sourceNumber}</p>}
-          {p.sourceNumber && p.type === "invoice" && <p>Réf. devis : {p.sourceNumber}</p>}
+          {p.sourceNumber && p.type === "credit_note" && <p>Avoir sur reçu : {p.sourceNumber}</p>}
+          {p.sourceNumber && p.type === "invoice" && <p>Réf. proposition de vente : {p.sourceNumber}</p>}
         </div>
       </div>
 
@@ -75,7 +71,6 @@ export function DocumentPreview(p: Props) {
         </p>
         {cl.country && cl.country !== "France" && <p>{cl.country}</p>}
         {cl.siren && <p>SIREN : {cl.siren}</p>}
-        {cl.vat_number && <p>N° TVA : {cl.vat_number}</p>}
       </div>
 
       <div className="mt-6 flex flex-wrap gap-x-8 text-[11px]">
@@ -97,8 +92,8 @@ export function DocumentPreview(p: Props) {
             <th className="py-2">Désignation</th>
             <th className="py-2 text-right">Qté</th>
             <th className="py-2 text-right">Unité</th>
-            <th className="py-2 text-right">PU HT</th>
-            <th className="py-2 text-right">Total HT</th>
+            <th className="py-2 text-right">PU net</th>
+            <th className="py-2 text-right">Prix net</th>
           </tr>
         </thead>
         <tbody>
@@ -116,12 +111,8 @@ export function DocumentPreview(p: Props) {
 
       <div className="mt-4 ml-auto w-64">
         <div className="flex justify-between py-1">
-          <span>Total HT</span>
+          <span>Prix net</span>
           <span className="tabular">{formatEUR(p.total)}</span>
-        </div>
-        <div className="flex justify-between py-1 text-muted-foreground">
-          <span>TVA</span>
-          <span>0,00 €</span>
         </div>
         <div className="flex justify-between border-t-2 border-ink py-2 text-base font-semibold">
           <span>Net à payer</span>
@@ -147,7 +138,7 @@ export function DocumentPreview(p: Props) {
       {p.type === "quote" && (
         <div className="mt-8 ml-auto h-28 w-72 rounded border border-dashed border-ink/40 p-3 text-[11px]">
           <p>Date et signature du client,</p>
-          <p className="text-muted-foreground">précédées de la mention « Bon pour accord »</p>
+          <p className="text-muted-foreground">précédées de la mention « Bon pour accord et validation de la proposition »</p>
         </div>
       )}
 

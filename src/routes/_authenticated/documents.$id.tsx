@@ -61,7 +61,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
   }
 
   async function finalize() {
-    if (!confirm(type === "quote" ? "Émettre ce devis ? Il recevra un numéro définitif." : "Émettre ce document ? Une fois numéroté, il ne pourra plus être modifié ni supprimé.")) return;
+    if (!confirm(type === "quote" ? "Émettre cette proposition de vente ? Elle recevra un numéro définitif." : "Émettre ce document ? Une fois numéroté, il ne pourra plus être modifié ni supprimé.")) return;
     setBusy(true);
     if (!(await saveDraft(true))) { setBusy(false); return; }
     const { error } = await supabase.rpc("finalize_document", { _doc_id: d.id });
@@ -88,7 +88,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
         due_date: newType === "invoice" ? addDays(today, settings?.payment_terms_days ?? 30) : null,
         service_date: d.service_date, operation_category: d.operation_category,
         items: items as never, total: documentTotal(items), source_id: d.id, payment_method: d.payment_method,
-        notes: newType === "credit_note" ? `Avoir annulant la facture ${d.number}.` : d.notes,
+        notes: newType === "credit_note" ? `Avoir annulant le reçu ${d.number}.` : d.notes,
       })
       .select("id")
       .single();
@@ -131,7 +131,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
               <Button variant="outline" onClick={() => setStatus("accepted")}>Accepté</Button>
             </>
           )}
-          {!isDraft && type === "quote" && d.status !== "refused" && <Button onClick={() => derive("invoice")}>Convertir en facture</Button>}
+          {!isDraft && type === "quote" && d.status !== "refused" && <Button onClick={() => derive("invoice")}>Convertir en reçu</Button>}
           {!isDraft && type === "invoice" && d.status === "issued" && (
             <Button onClick={() => setStatus("paid", { paid_at: todayISO() })}>Marquer payée</Button>
           )}

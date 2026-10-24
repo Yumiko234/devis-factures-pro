@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/documents/")({
-  head: () => ({ meta: [{ title: "Devis & factures — Registre" }] }),
+  head: () => ({ meta: [{ title: "Propositions de vente & reçus — Registre" }] }),
   component: DocumentsPage,
 });
 
@@ -21,19 +21,19 @@ function DocumentsPage() {
   return (
     <div>
       <PageHeader
-        title="Devis & factures"
+        title="Propositions de vente & reçus"
         actions={
           <>
-            <Button variant="outline" asChild><Link to="/documents/new" search={{ type: "quote" }}>Nouveau devis</Link></Button>
-            <Button asChild><Link to="/documents/new" search={{ type: "invoice" }}>Nouvelle facture</Link></Button>
+            <Button variant="outline" asChild><Link to="/documents/new" search={{ type: "quote" }}>Nouvelle proposition de vente</Link></Button>
+            <Button asChild><Link to="/documents/new" search={{ type: "invoice" }}>Nouveau reçu</Link></Button>
           </>
         }
       />
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mb-4">
         <TabsList>
           <TabsTrigger value="all">Tous</TabsTrigger>
-          <TabsTrigger value="quote">Devis</TabsTrigger>
-          <TabsTrigger value="invoice">Factures</TabsTrigger>
+          <TabsTrigger value="quote">Propositions de vente</TabsTrigger>
+          <TabsTrigger value="invoice">Reçus</TabsTrigger>
           <TabsTrigger value="credit_note">Avoirs</TabsTrigger>
         </TabsList>
       </Tabs>

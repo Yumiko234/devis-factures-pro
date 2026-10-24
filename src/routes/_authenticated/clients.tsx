@@ -25,7 +25,7 @@ const empty: Form = {
 const fields: [keyof Form, string][] = [
   ["name", "Raison sociale / Nom *"], ["contact_name", "Contact"], ["email", "Email"], ["phone", "Téléphone"],
   ["address", "Adresse"], ["postal_code", "Code postal"], ["city", "Ville"], ["country", "Pays"],
-  ["siren", "SIREN (obligatoire pour les pros)"], ["vat_number", "N° TVA intracommunautaire"],
+  ["siren", "SIREN (obligatoire pour les pros)"],
 ];
 
 function ClientsPage() {

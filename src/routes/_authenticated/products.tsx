@@ -77,7 +77,7 @@ function ProductsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5 sm:col-span-2"><Label>Nom *</Label><Input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></div>
               <div className="space-y-1.5 sm:col-span-2"><Label>Description</Label><Textarea value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></div>
-              <div className="space-y-1.5"><Label>Prix unitaire HT (€)</Label><Input type="number" step="0.01" value={editing.unit_price} onChange={(e) => setEditing({ ...editing, unit_price: Number(e.target.value) })} /></div>
+              <div className="space-y-1.5"><Label>Prix unitaire net (€)</Label><Input type="number" step="0.01" value={editing.unit_price} onChange={(e) => setEditing({ ...editing, unit_price: Number(e.target.value) })} /></div>
               <div className="space-y-1.5"><Label>Unité</Label><Input value={editing.unit} onChange={(e) => setEditing({ ...editing, unit: e.target.value })} /></div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>Type</Label>

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 const nav = [
   { to: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-  { to: "/documents", label: "Devis & factures", icon: FileText },
+  { to: "/documents", label: "Propositions de vente & reçus", icon: FileText },
   { to: "/clients", label: "Clients", icon: Users },
   { to: "/products", label: "Catalogue", icon: Package },
   { to: "/settings", label: "Mon entreprise", icon: Settings },

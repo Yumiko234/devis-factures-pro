@@ -32,9 +32,9 @@ function Dashboard() {
 
   const stats = [
     { label: `CA encaissé ${year}`, value: formatEUR(revenue) },
-    { label: "À encaisser", value: formatEUR(unpaid.reduce((s, d) => s + Number(d.total), 0)), sub: `${unpaid.length} facture(s)` },
-    { label: "En retard", value: formatEUR(overdue.reduce((s, d) => s + Number(d.total), 0)), sub: `${overdue.length} facture(s)` },
-    { label: "Devis en attente", value: formatEUR(pendingQuotes.reduce((s, d) => s + Number(d.total), 0)), sub: `${pendingQuotes.length} devis` },
+    { label: "À encaisser", value: formatEUR(unpaid.reduce((s, d) => s + Number(d.total), 0)), sub: `${unpaid.length} reçu(s)` },
+    { label: "En retard", value: formatEUR(overdue.reduce((s, d) => s + Number(d.total), 0)), sub: `${overdue.length} reçu(s)` },
+    { label: "Propositions de vente en attente", value: formatEUR(pendingQuotes.reduce((s, d) => s + Number(d.total), 0)), sub: `${pendingQuotes.length} proposition(s) de vente` },
   ];
 
   return (
@@ -44,8 +44,8 @@ function Dashboard() {
         subtitle={settings?.name || "Bienvenue"}
         actions={
           <>
-            <Button variant="outline" asChild><Link to="/documents/new" search={{ type: "quote" }}>Nouveau devis</Link></Button>
-            <Button asChild><Link to="/documents/new" search={{ type: "invoice" }}>Nouvelle facture</Link></Button>
+            <Button variant="outline" asChild><Link to="/documents/new" search={{ type: "quote" }}>Nouvelle proposition de vente</Link></Button>
+            <Button asChild><Link to="/documents/new" search={{ type: "invoice" }}>Nouveau reçu</Link></Button>
           </>
         }
       />
