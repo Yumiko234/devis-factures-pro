@@ -63,9 +63,9 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
   async function finalize() {
     if (!confirm(type === "quote" ? "Émettre ce devis ? Il recevra un numéro définitif." : "Émettre ce document ? Une fois numéroté, il ne pourra plus être modifié ni supprimé.")) return;
     setBusy(true);
-    if (!(await saveDraft(true))) return setBusy(false);
+    if (!(await saveDraft(true))) { setBusy(false); return; }
     const { error } = await supabase.rpc("finalize_document", { _doc_id: d.id });
-    if (error) { setBusy(false); return toast.error(error.message); }
+    if (error) { setBusy(false); { toast.error(error.message); return; } }
     if (type === "credit_note" && d.source_id) await supabase.from("documents").update({ status: "cancelled" }).eq("id", d.source_id);
     setBusy(false);
     toast.success(`${DOC_LABEL[type]} émis(e)`);
@@ -74,7 +74,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
 
   async function setStatus(status: string, extra: Record<string, unknown> = {}) {
     const { error } = await supabase.from("documents").update({ status, ...extra }).eq("id", d.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     refresh();
   }
 
@@ -92,7 +92,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
       })
       .select("id")
       .single();
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     if (newType === "invoice" && type === "quote") await supabase.from("documents").update({ status: "accepted" }).eq("id", d.id);
     refresh();
     navigate({ to: "/documents/$id", params: { id: data.id } });
@@ -101,7 +101,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
   async function removeDraft() {
     if (!confirm("Supprimer ce brouillon ?")) return;
     const { error } = await supabase.from("documents").delete().eq("id", d.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     refresh();
     navigate({ to: "/documents" });
   }

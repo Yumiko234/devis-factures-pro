@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { addDays, todayISO } from "@/lib/invoice";
 
 export const Route = createFileRoute("/_authenticated/documents/new")({
-  validateSearch: (s: Record<string, unknown>) => ({ type: s.type === "quote" ? "quote" : "invoice" }) as { type: "quote" | "invoice" },
+  validateSearch: (s: Record<string, unknown>) => ({ type: s["type"] === "quote" ? "quote" : "invoice" }) as { type: "quote" | "invoice" },
   head: () => ({ meta: [{ title: "Nouveau document — Registre" }] }),
   component: NewDoc,
 });
@@ -32,7 +32,7 @@ function NewDoc() {
         })
         .select("id")
         .single();
-      if (error) return toast.error(error.message);
+      if (error) { toast.error(error.message); return; }
       navigate({ to: "/documents/$id", params: { id: data.id }, replace: true });
     })();
   }, [type, navigate]);
