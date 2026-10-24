@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useClients, useDocument, useDocuments, useProducts, useSettings, type DocumentRow } from "@/lib/data";
 import { addDays, displayStatus, documentTotal, todayISO, DOC_LABEL, type DocType, type LineItem } from "@/lib/invoice";
 import { DocumentPreview } from "@/components/app/DocumentPreview";
+import { NewDocument } from "@/components/app/NewDocument";
 import { Panel, StatusBadge } from "@/components/app/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,17 @@ export const Route = createFileRoute("/_authenticated/documents/$id")({
 
 function DocPage() {
   const { id } = Route.useParams();
-  const { data: doc, isLoading } = useDocument(id);
+  // Garde-fou : « /documents/new » ne doit jamais être lu comme un identifiant de document.
+  if (id === "new") {
+    const t = new URLSearchParams(window.location.search).get("type");
+    return <NewDocument type={t === "quote" ? "quote" : "invoice"} />;
+  }
+  return <DocLoader id={id} />;
+}
+
+function DocLoader({ id }: { id: string }) {
+  const { data: doc, isLoading, error } = useDocument(id);
+  if (error) return <p className="text-destructive">Impossible de charger ce document : {(error as Error).message}</p>;
   if (isLoading || !doc) return <p className="text-muted-foreground">Chargement…</p>;
   return <DocEditor key={doc.id + doc.updated_at} doc={doc} />;
 }
