@@ -46,9 +46,6 @@ export function DocumentPreview(p: Props) {
           </p>
           {c.email && <p>{c.email}</p>}
           {c.phone && <p>{c.phone}</p>}
-          <p className="mt-1">SIRET : {c.siret || "—"}</p>
-          {c.ape_code && <p>Code APE : {c.ape_code}</p>}
-          {c.rcs_rm && <p>{c.rcs_rm}</p>}
         </div>
         <div className="text-right">
           <p className="font-display text-4xl">{DOC_LABEL[p.type]}</p>
@@ -70,7 +67,6 @@ export function DocumentPreview(p: Props) {
           {cl.postal_code} {cl.city}
         </p>
         {cl.country && cl.country !== "France" && <p>{cl.country}</p>}
-        {cl.siren && <p>SIREN : {cl.siren}</p>}
       </div>
 
       <div className="mt-6 flex flex-wrap gap-x-8 text-[11px]">

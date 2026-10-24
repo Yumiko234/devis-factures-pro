@@ -25,7 +25,6 @@ const empty: Form = {
 const fields: [keyof Form, string][] = [
   ["name", "Raison sociale / Nom *"], ["contact_name", "Contact"], ["email", "Email"], ["phone", "Téléphone"],
   ["address", "Adresse"], ["postal_code", "Code postal"], ["city", "Ville"], ["country", "Pays"],
-  ["siren", "SIREN (obligatoire pour les pros)"],
 ];
 
 function ClientsPage() {
@@ -64,7 +63,7 @@ function ClientsPage() {
               <div key={c.id} className="flex items-center justify-between gap-4 p-4">
                 <div className="min-w-0">
                   <p className="font-medium">{c.name} <span className="ml-2 text-xs text-muted-foreground">{c.is_professional ? "Professionnel" : "Particulier"}</span></p>
-                  <p className="truncate text-sm text-muted-foreground">{[c.email, c.city, c.siren && `SIREN ${c.siren}`].filter(Boolean).join(" · ")}</p>
+                  <p className="truncate text-sm text-muted-foreground">{[c.email, c.city].filter(Boolean).join(" · ")}</p>
                 </div>
                 <div className="flex gap-1">
                   <Button size="icon" variant="ghost" aria-label="Modifier" onClick={() => setEditing({ ...c })}><Pencil className="h-4 w-4" /></Button>

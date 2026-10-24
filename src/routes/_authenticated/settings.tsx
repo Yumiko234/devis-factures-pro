@@ -28,10 +28,7 @@ const sections: { title: string; fields: [keyof Form, string, string?][] }[] = [
     fields: [
       ["name", "Nom commercial *"],
       ["owner_name", "Nom et prénom de l'entrepreneur"],
-      ["legal_mention", "Mention de statut", "« EI » ou « Entrepreneur individuel » (obligatoire)"],
-      ["siret", "SIRET *"],
-      ["ape_code", "Code APE"],
-      ["rcs_rm", "RCS / RM", "Ex : RCS Lyon 123 456 789 — si immatriculé"],
+      ["legal_mention", "Mention de statut", "Facultatif (ex : « EI »)"],
       ["insurance", "Assurance professionnelle", "Obligatoire pour certains artisans : assureur et couverture"],
     ],
   },
