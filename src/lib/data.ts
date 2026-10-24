@@ -18,19 +18,19 @@ function unwrap<T>(res: { data: T | null; error: { message: string } | null }): 
 export const useClients = () =>
   useQuery({
     queryKey: ["clients"],
-    queryFn: async () => unwrap(await supabase.from("clients").select("*").order("name")),
+    queryFn: async () => (unwrap(await supabase.from("clients").select("*").order("name")) as Client[]),
   });
 
 export const useProducts = () =>
   useQuery({
     queryKey: ["products"],
-    queryFn: async () => unwrap(await supabase.from("products").select("*").order("name")),
+    queryFn: async () => (unwrap(await supabase.from("products").select("*").order("name")) as Product[]),
   });
 
 export const useSettings = () =>
   useQuery({
     queryKey: ["settings"],
-    queryFn: async () => unwrap(await supabase.from("company_settings").select("*").maybeSingle()),
+    queryFn: async () => (unwrap(await supabase.from("company_settings").select("*").maybeSingle()) as Settings | null),
   });
 
 export const useDocuments = () =>

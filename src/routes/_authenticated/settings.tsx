@@ -62,18 +62,18 @@ function SettingsPage() {
 
   useEffect(() => {
     if (data) {
-      const { user_id: _u, created_at: _c, updated_at: _up, ...rest } = data;
+      const { user_id: _u, created_at: _c, updated_at: _up, ...rest } = data as Settings;
       setForm(rest);
     }
   }, [data]);
 
   async function save() {
-    if (form.payment_terms_days > 60) return toast.error("Le délai de paiement ne peut excéder 60 jours.");
+    if (form.payment_terms_days > 60) { toast.error("Le délai de paiement ne peut excéder 60 jours."); return; }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("company_settings").upsert({ ...form, user_id: u.user!.id, updated_at: new Date().toISOString() });
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Informations enregistrées");
     qc.invalidateQueries({ queryKey: ["settings"] });
   }

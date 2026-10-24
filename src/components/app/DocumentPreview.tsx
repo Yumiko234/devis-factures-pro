@@ -24,7 +24,7 @@ interface Props {
   paymentMethod: string;
   company: Partial<Settings> | null;
   client: Partial<Client> | null;
-  sourceNumber?: string | null;
+  sourceNumber?: string | null | undefined;
 }
 
 export function DocumentPreview(p: Props) {

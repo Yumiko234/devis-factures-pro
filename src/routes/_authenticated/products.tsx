@@ -28,12 +28,12 @@ function ProductsPage() {
   const [editing, setEditing] = useState<(Form & { id?: string }) | null>(null);
 
   async function save() {
-    if (!editing?.name.trim()) return toast.error("Le nom est obligatoire.");
+    if (!editing?.name.trim()) { toast.error("Le nom est obligatoire."); return; }
     const { id, ...rest } = editing;
     const { error } = id
       ? await supabase.from("products").update(rest).eq("id", id)
       : await supabase.from("products").insert(rest);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Élément enregistré");
     setEditing(null);
     qc.invalidateQueries({ queryKey: ["products"] });
