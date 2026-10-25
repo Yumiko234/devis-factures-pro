@@ -88,3 +88,35 @@ export function legalMentions(opts: {
   }
   return m;
 }
+
+export interface Deposit {
+  label: string;
+  amount: number;
+}
+
+export function depositsTotal(deposits: Deposit[]): number {
+  return round2(deposits.reduce((s, d) => s + (Number(d.amount) || 0), 0));
+}
+
+/** Net à payer = total HT (pas de TVA) moins les acomptes déjà versés. */
+export function netToPay(total: number, deposits: Deposit[]): number {
+  return round2(total - depositsTotal(deposits));
+}
+
+export const SIRET_PENDING = "en cours d'attribution";
+
+const ALLOWED_TAGS = new Set(["b", "strong", "i", "em", "u", "br", "div", "p"]);
+
+/** Garde uniquement gras / italique / souligné / retours à la ligne ; supprime tout attribut. */
+export function sanitizeRichText(html: string): string {
+  return (html || "")
+    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, "")
+    .replace(/<\/?([a-z0-9]+)[^>]*>/gi, (tag, name: string) => {
+      const n = name.toLowerCase();
+      if (!ALLOWED_TAGS.has(n)) return "";
+      return tag.startsWith("</") ? `</${n}>` : `<${n}>`;
+    });
+}
+
+export const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");

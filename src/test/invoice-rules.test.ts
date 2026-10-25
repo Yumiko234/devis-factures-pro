@@ -29,3 +29,14 @@ describe("règles de facturation micro-entreprise", () => {
     expect(displayStatus({ type: "invoice", status: "paid", due_date: "2000-01-01" })).toBe("paid");
   });
 });
+
+import { netToPay, sanitizeRichText } from "@/lib/invoice";
+
+describe("acomptes et mise en forme", () => {
+  it("déduit les acomptes du net à payer", () => {
+    expect(netToPay(1000, [{ label: "Acompte 30 %", amount: 300 }, { label: "b", amount: 50.5 }])).toBe(649.5);
+  });
+  it("conserve gras/italique/souligné et retire le reste", () => {
+    expect(sanitizeRichText('<b onclick="x">a</b><script>x</script><a href="y"><u>c</u></a>')).toBe("<b>a</b><u>c</u>");
+  });
+});
