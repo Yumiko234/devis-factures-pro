@@ -5,6 +5,12 @@ import {
   formatEUR,
   legalMentions,
   lineTotal,
+  depositsTotal,
+  netToPay,
+  sanitizeRichText,
+  escapeHtml,
+  SIRET_PENDING,
+  type Deposit,
   type DocType,
   type LineItem,
 } from "@/lib/invoice";
@@ -25,11 +31,14 @@ interface Props {
   company: Partial<Settings> | null;
   client: Partial<Client> | null;
   sourceNumber?: string | null | undefined;
+  deposits?: Deposit[] | undefined;
 }
 
 export function DocumentPreview(p: Props) {
   const c = p.company ?? {};
   const cl = p.client ?? {};
+  const deps = p.deposits ?? [];
+  void depositsTotal;
   const mentions = legalMentions({
     type: p.type,
     clientIsProfessional: cl.is_professional ?? true,
@@ -50,7 +59,7 @@ export function DocumentPreview(p: Props) {
           </p>
           {c.email && <p>{c.email}</p>}
           {c.phone && <p>{c.phone}</p>}
-          <p className="mt-1">SIRET : {c.siret || "—"}</p>
+          <p className="mt-1">SIRET : {c.siret || SIRET_PENDING}</p>
           {c.ape_code && <p>Code APE : {c.ape_code}</p>}
           {c.rcs_rm && <p>{c.rcs_rm}</p>}
         </div>
@@ -104,7 +113,7 @@ export function DocumentPreview(p: Props) {
         <tbody>
           {p.items.map((it, i) => (
             <tr key={i} className="border-b border-border align-top">
-              <td className="whitespace-pre-wrap py-2 pr-4">{it.description || "—"}</td>
+              <td className="py-2 pr-4" dangerouslySetInnerHTML={{ __html: sanitizeRichText(it.description?.includes("<") ? it.description : escapeHtml(it.description || "—")) }} />
               <td className="tabular py-2 text-right">{it.quantity}</td>
               <td className="py-2 text-right">{it.unit}</td>
               <td className="tabular py-2 text-right">{formatEUR(it.unit_price)}</td>
@@ -114,18 +123,32 @@ export function DocumentPreview(p: Props) {
         </tbody>
       </table>
 
-      <div className="mt-4 ml-auto w-64">
+      <div className="mt-4 ml-auto w-72">
         <div className="flex justify-between py-1">
-          <span>Total HT</span>
+          <span>{deps.length ? "Sous-total HT" : "Total HT"}</span>
           <span className="tabular">{formatEUR(p.total)}</span>
         </div>
         <div className="flex justify-between py-1 text-muted-foreground">
           <span>TVA</span>
           <span>0,00 €</span>
         </div>
+        {deps.length > 0 && (
+          <>
+            <div className="flex justify-between border-t border-border py-1">
+              <span>Total TTC</span>
+              <span className="tabular">{formatEUR(p.total)}</span>
+            </div>
+            {deps.map((d, i) => (
+              <div key={i} className="flex justify-between py-1">
+                <span>{d.label || "Acompte versé"}</span>
+                <span className="tabular">− {formatEUR(Number(d.amount))}</span>
+              </div>
+            ))}
+          </>
+        )}
         <div className="flex justify-between border-t-2 border-ink py-2 text-base font-semibold">
           <span>Net à payer</span>
-          <span className="tabular">{formatEUR(p.total)}</span>
+          <span className="tabular">{formatEUR(netToPay(p.total, deps))}</span>
         </div>
       </div>
 

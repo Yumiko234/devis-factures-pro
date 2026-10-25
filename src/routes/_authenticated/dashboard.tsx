@@ -49,9 +49,9 @@ function Dashboard() {
           </>
         }
       />
-      {!settings?.siret && (
+      {(!settings?.name || !settings?.address) && (
         <Panel className="mb-6 border-accent bg-accent/10 p-4 text-sm">
-          Complétez <Link to="/settings" className="font-medium underline">les informations de votre entreprise</Link> (nom, adresse, SIRET) pour pouvoir émettre des documents.
+          Complétez <Link to="/settings" className="font-medium underline">les informations de votre entreprise</Link> (nom, adresse) pour pouvoir émettre des documents.
         </Panel>
       )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
