@@ -5,14 +5,14 @@ import { toast } from "sonner";
 import { ArrowLeft, Plus, Printer, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useClients, useDocument, useDocuments, useProducts, useSettings, type DocumentRow } from "@/lib/data";
-import { addDays, displayStatus, documentTotal, todayISO, DOC_LABEL, type DocType, type LineItem } from "@/lib/invoice";
+import { addDays, displayStatus, documentTotal, escapeHtml, depositsTotal, todayISO, DOC_LABEL, type DocType, type LineItem } from "@/lib/invoice";
 import { DocumentPreview } from "@/components/app/DocumentPreview";
-import { NewDocument } from "@/components/app/NewDocument";
 import { Panel, StatusBadge } from "@/components/app/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextInput } from "@/components/app/RichTextInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/documents/$id")({
@@ -22,17 +22,7 @@ export const Route = createFileRoute("/_authenticated/documents/$id")({
 
 function DocPage() {
   const { id } = Route.useParams();
-  // Garde-fou : « /documents/new » ne doit jamais être lu comme un identifiant de document.
-  if (id === "new") {
-    const t = new URLSearchParams(window.location.search).get("type");
-    return <NewDocument type={t === "quote" ? "quote" : "invoice"} />;
-  }
-  return <DocLoader id={id} />;
-}
-
-function DocLoader({ id }: { id: string }) {
-  const { data: doc, isLoading, error } = useDocument(id);
-  if (error) return <p className="text-destructive">Impossible de charger ce document : {(error as Error).message}</p>;
+  const { data: doc, isLoading } = useDocument(id);
   if (isLoading || !doc) return <p className="text-muted-foreground">Chargement…</p>;
   return <DocEditor key={doc.id + doc.updated_at} doc={doc} />;
 }
@@ -62,7 +52,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
       .from("documents")
       .update({
         client_id: d.client_id, issue_date: d.issue_date, due_date: d.due_date, valid_until: d.valid_until,
-        service_date: d.service_date, operation_category: d.operation_category, items: d.items as never,
+        service_date: d.service_date, operation_category: d.operation_category, items: d.items as never, deposits: d.deposits as never,
         total, notes: d.notes, payment_method: d.payment_method,
       })
       .eq("id", d.id);
@@ -72,7 +62,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
   }
 
   async function finalize() {
-    if (!confirm(type === "quote" ? "Émettre cette proposition de vente ? Elle recevra un numéro définitif." : "Émettre ce document ? Une fois numéroté, il ne pourra plus être modifié ni supprimé.")) return;
+    if (!confirm(type === "quote" ? "Émettre ce devis ? Il recevra un numéro définitif." : "Émettre ce document ? Une fois numéroté, il ne pourra plus être modifié ni supprimé.")) return;
     setBusy(true);
     if (!(await saveDraft(true))) { setBusy(false); return; }
     const { error } = await supabase.rpc("finalize_document", { _doc_id: d.id });
@@ -99,7 +89,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
         due_date: newType === "invoice" ? addDays(today, settings?.payment_terms_days ?? 30) : null,
         service_date: d.service_date, operation_category: d.operation_category,
         items: items as never, total: documentTotal(items), source_id: d.id, payment_method: d.payment_method,
-        notes: newType === "credit_note" ? `Avoir annulant le reçu ${d.number}.` : d.notes,
+        notes: newType === "credit_note" ? `Avoir annulant la facture ${d.number}.` : d.notes,
       })
       .select("id")
       .single();
@@ -142,7 +132,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
               <Button variant="outline" onClick={() => setStatus("accepted")}>Accepté</Button>
             </>
           )}
-          {!isDraft && type === "quote" && d.status !== "refused" && <Button onClick={() => derive("invoice")}>Convertir en reçu</Button>}
+          {!isDraft && type === "quote" && d.status !== "refused" && <Button onClick={() => derive("invoice")}>Convertir en facture</Button>}
           {!isDraft && type === "invoice" && d.status === "issued" && (
             <Button onClick={() => setStatus("paid", { paid_at: todayISO() })}>Marquer payée</Button>
           )}
@@ -190,7 +180,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
                 {products.length > 0 && (
                   <Select value="" onValueChange={(pid) => {
                     const p = products.find((x) => x.id === pid)!;
-                    setD({ ...d, items: [...d.items.filter((i) => i.description || i.unit_price), { description: p.name + (p.description ? `\n${p.description}` : ""), quantity: 1, unit: p.unit, unit_price: Number(p.unit_price) * (type === "credit_note" ? -1 : 1) }] });
+                    setD({ ...d, items: [...d.items.filter((i) => i.description || i.unit_price), { description: `<b>${escapeHtml(p.name)}</b>` + (p.description ? `<br>${escapeHtml(p.description)}` : ""), quantity: 1, unit: p.unit, unit_price: Number(p.unit_price) * (type === "credit_note" ? -1 : 1) }] });
                   }}>
                     <SelectTrigger className="w-44"><SelectValue placeholder="Depuis le catalogue" /></SelectTrigger>
                     <SelectContent>{products.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
@@ -199,7 +189,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
               </div>
               {d.items.map((it, i) => (
                 <div key={i} className="space-y-2 rounded-md border border-border p-3">
-                  <Textarea rows={2} placeholder="Désignation" value={it.description} onChange={(e) => setItem(i, { description: e.target.value })} />
+                  <RichTextInput placeholder="Désignation" value={it.description.includes("<") ? it.description : escapeHtml(it.description)} onChange={(html) => setItem(i, { description: html })} />
                   <div className="grid grid-cols-[1fr_1fr_1.3fr_auto] gap-2">
                     <Input type="number" step="0.01" aria-label="Quantité" value={it.quantity} onChange={(e) => setItem(i, { quantity: Number(e.target.value) })} />
                     <Input aria-label="Unité" value={it.unit} onChange={(e) => setItem(i, { unit: e.target.value })} />
@@ -213,6 +203,26 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
               </Button>
             </Panel>
 
+            {type === "invoice" && (
+              <Panel className="space-y-3 p-5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg">Acomptes déjà versés</h2>
+                  <Button size="sm" variant="outline" onClick={() => setD({ ...d, deposits: [...(d.deposits ?? []), { label: `Acompte reçu le ${new Date().toLocaleDateString("fr-FR")}`, amount: 0 }] })}>
+                    <Plus className="h-4 w-4" /> Acompte
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Affiche un sous-total puis déduit les acomptes du net à payer.</p>
+                {(d.deposits ?? []).map((dep, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_7rem_auto] gap-2">
+                    <Input aria-label="Libellé de l'acompte" value={dep.label} onChange={(e) => setD({ ...d, deposits: d.deposits.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) })} />
+                    <Input type="number" step="0.01" aria-label="Montant de l'acompte" value={dep.amount} onChange={(e) => setD({ ...d, deposits: d.deposits.map((x, j) => (j === i ? { ...x, amount: Number(e.target.value) } : x)) })} />
+                    <Button size="icon" variant="ghost" aria-label="Retirer l'acompte" onClick={() => setD({ ...d, deposits: d.deposits.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                ))}
+                {depositsTotal(d.deposits ?? []) > total && <p className="text-xs text-destructive">Les acomptes dépassent le total.</p>}
+              </Panel>
+            )}
+
             <Panel className="space-y-4 p-5">
               {type === "invoice" && <div className="space-y-1.5"><Label>Mode de paiement</Label><Input value={d.payment_method} onChange={(e) => setD({ ...d, payment_method: e.target.value })} /></div>}
               <div className="space-y-1.5"><Label>Notes</Label><Textarea value={d.notes} onChange={(e) => setD({ ...d, notes: e.target.value })} /></div>
@@ -225,7 +235,7 @@ function DocEditor({ doc }: { doc: DocumentRow }) {
             type={type} number={d.number} issueDate={d.issue_date} dueDate={d.due_date} validUntil={d.valid_until}
             serviceDate={d.service_date} operationCategory={d.operation_category} items={d.items} total={isDraft ? total : Number(d.total)}
             notes={d.notes} paymentMethod={d.payment_method} company={company as never} client={client as never}
-            sourceNumber={source?.number}
+            sourceNumber={source?.number} deposits={d.deposits ?? []}
           />
         </div>
       </div>

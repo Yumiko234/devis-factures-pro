@@ -149,6 +149,7 @@ export type Database = {
           client_snapshot: Json | null
           company_snapshot: Json | null
           created_at: string
+          deposits: Json
           due_date: string | null
           finalized_at: string | null
           id: string
@@ -173,6 +174,7 @@ export type Database = {
           client_snapshot?: Json | null
           company_snapshot?: Json | null
           created_at?: string
+          deposits?: Json
           due_date?: string | null
           finalized_at?: string | null
           id?: string
@@ -197,6 +199,7 @@ export type Database = {
           client_snapshot?: Json | null
           company_snapshot?: Json | null
           created_at?: string
+          deposits?: Json
           due_date?: string | null
           finalized_at?: string | null
           id?: string
@@ -278,6 +281,7 @@ export type Database = {
           client_snapshot: Json | null
           company_snapshot: Json | null
           created_at: string
+          deposits: Json
           due_date: string | null
           finalized_at: string | null
           id: string

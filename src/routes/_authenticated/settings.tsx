@@ -28,7 +28,10 @@ const sections: { title: string; fields: [keyof Form, string, string?][] }[] = [
     fields: [
       ["name", "Nom commercial *"],
       ["owner_name", "Nom et prénom de l'entrepreneur"],
-      ["legal_mention", "Mention de statut", "Facultatif (ex : « EI »)"],
+      ["legal_mention", "Mention de statut", "« EI » ou « Entrepreneur individuel » (obligatoire)"],
+      ["siret", "SIRET", "Laissez vide en attendant l'attribution : « en cours d'attribution » sera affiché"],
+      ["ape_code", "Code APE"],
+      ["rcs_rm", "RCS / RM", "Ex : RCS Lyon 123 456 789 — si immatriculé"],
       ["insurance", "Assurance professionnelle", "Obligatoire pour certains artisans : assureur et couverture"],
     ],
   },
@@ -44,7 +47,8 @@ const sections: { title: string; fields: [keyof Form, string, string?][] }[] = [
     fields: [
       ["iban", "IBAN"], ["bic", "BIC"],
       ["payment_terms_days", "Délai de paiement (jours)", "Maximum légal : 60 jours"],
-      ["quote_validity_days", "Validité des propositions de vente (jours)"],
+      ["quote_validity_days", "Validité des devis (jours)"],
+      ["late_penalty", "Taux des pénalités de retard"],
       ["footer_note", "Note de pied de page"],
     ],
   },
@@ -78,7 +82,7 @@ function SettingsPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Mon entreprise" subtitle="Ces informations apparaissent sur toutes vos propositions de vente et tous vos reçus." actions={<Button onClick={save} disabled={saving}>Enregistrer</Button>} />
+      <PageHeader title="Mon entreprise" subtitle="Ces informations apparaissent sur tous vos devis et factures." actions={<Button onClick={save} disabled={saving}>Enregistrer</Button>} />
       <div className="space-y-6">
         {sections.map((s) => (
           <Panel key={s.title} className="p-6">
@@ -101,6 +105,9 @@ function SettingsPage() {
             </div>
           </Panel>
         ))}
+        <Panel className="bg-secondary p-6 text-sm text-secondary-foreground">
+          Les mentions « TVA non applicable, art. 293 B du CGI », pénalités de retard et indemnité forfaitaire de 40 € sont ajoutées automatiquement.
+        </Panel>
       </div>
     </div>
   );

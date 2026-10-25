@@ -74,8 +74,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Registre — Propositions de vente et reçus" },
-      { name: "description", content: "Créez des propositions de vente et des reçus clairs et lisibles." },
+      { title: "Registre — Devis et factures pour micro-entrepreneurs" },
+      { name: "description", content: "Créez des devis et factures conformes à la législation française." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

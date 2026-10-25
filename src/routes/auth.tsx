@@ -13,7 +13,7 @@ export const Route = createFileRoute("/auth")({
       { title: "Connexion — Registre" },
       { name: "description", content: "Connectez-vous à votre espace de facturation Registre." },
       { property: "og:title", content: "Connexion — Registre" },
-      { property: "og:description", content: "Accédez à vos propositions de vente et reçus." },
+      { property: "og:description", content: "Accédez à vos devis et factures." },
     ],
   }),
   component: AuthPage,

@@ -8,6 +8,13 @@
       "when": 1792775792929,
       "tag": "0000_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792922373943,
+      "tag": "0001_deposits_and_pending_siret",
+      "breakpoints": true
     }
   ]
 }

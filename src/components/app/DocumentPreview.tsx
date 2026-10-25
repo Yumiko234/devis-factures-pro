@@ -5,6 +5,12 @@ import {
   formatEUR,
   legalMentions,
   lineTotal,
+  depositsTotal,
+  netToPay,
+  sanitizeRichText,
+  escapeHtml,
+  SIRET_PENDING,
+  type Deposit,
   type DocType,
   type LineItem,
 } from "@/lib/invoice";
@@ -25,12 +31,19 @@ interface Props {
   company: Partial<Settings> | null;
   client: Partial<Client> | null;
   sourceNumber?: string | null | undefined;
+  deposits?: Deposit[] | undefined;
 }
 
 export function DocumentPreview(p: Props) {
   const c = p.company ?? {};
   const cl = p.client ?? {};
-  const mentions = legalMentions({ type: p.type });
+  const deps = p.deposits ?? [];
+  void depositsTotal;
+  const mentions = legalMentions({
+    type: p.type,
+    clientIsProfessional: cl.is_professional ?? true,
+    latePenalty: c.late_penalty || "trois fois le taux d'intérêt légal",
+  });
 
   return (
     <div className="print-sheet shadow-paper mx-auto flex min-h-[297mm] w-full max-w-[210mm] flex-col bg-paper p-[14mm] text-[12px] leading-relaxed text-ink">
@@ -46,6 +59,9 @@ export function DocumentPreview(p: Props) {
           </p>
           {c.email && <p>{c.email}</p>}
           {c.phone && <p>{c.phone}</p>}
+          <p className="mt-1">SIRET : {c.siret || SIRET_PENDING}</p>
+          {c.ape_code && <p>Code APE : {c.ape_code}</p>}
+          {c.rcs_rm && <p>{c.rcs_rm}</p>}
         </div>
         <div className="text-right">
           <p className="font-display text-4xl">{DOC_LABEL[p.type]}</p>
@@ -53,8 +69,8 @@ export function DocumentPreview(p: Props) {
           <p className="mt-3">Date d'émission : {formatDate(p.issueDate)}</p>
           {p.type === "quote" && <p>Valable jusqu'au : {formatDate(p.validUntil)}</p>}
           {p.type === "invoice" && <p>Échéance : {formatDate(p.dueDate)}</p>}
-          {p.sourceNumber && p.type === "credit_note" && <p>Avoir sur reçu : {p.sourceNumber}</p>}
-          {p.sourceNumber && p.type === "invoice" && <p>Réf. proposition de vente : {p.sourceNumber}</p>}
+          {p.sourceNumber && p.type === "credit_note" && <p>Avoir sur facture : {p.sourceNumber}</p>}
+          {p.sourceNumber && p.type === "invoice" && <p>Réf. devis : {p.sourceNumber}</p>}
         </div>
       </div>
 
@@ -67,6 +83,8 @@ export function DocumentPreview(p: Props) {
           {cl.postal_code} {cl.city}
         </p>
         {cl.country && cl.country !== "France" && <p>{cl.country}</p>}
+        {cl.siren && <p>SIREN : {cl.siren}</p>}
+        {cl.vat_number && <p>N° TVA : {cl.vat_number}</p>}
       </div>
 
       <div className="mt-6 flex flex-wrap gap-x-8 text-[11px]">
@@ -88,14 +106,14 @@ export function DocumentPreview(p: Props) {
             <th className="py-2">Désignation</th>
             <th className="py-2 text-right">Qté</th>
             <th className="py-2 text-right">Unité</th>
-            <th className="py-2 text-right">PU net</th>
-            <th className="py-2 text-right">Prix net</th>
+            <th className="py-2 text-right">PU HT</th>
+            <th className="py-2 text-right">Total HT</th>
           </tr>
         </thead>
         <tbody>
           {p.items.map((it, i) => (
             <tr key={i} className="border-b border-border align-top">
-              <td className="whitespace-pre-wrap py-2 pr-4">{it.description || "—"}</td>
+              <td className="py-2 pr-4" dangerouslySetInnerHTML={{ __html: sanitizeRichText(it.description?.includes("<") ? it.description : escapeHtml(it.description || "—")) }} />
               <td className="tabular py-2 text-right">{it.quantity}</td>
               <td className="py-2 text-right">{it.unit}</td>
               <td className="tabular py-2 text-right">{formatEUR(it.unit_price)}</td>
@@ -105,14 +123,32 @@ export function DocumentPreview(p: Props) {
         </tbody>
       </table>
 
-      <div className="mt-4 ml-auto w-64">
+      <div className="mt-4 ml-auto w-72">
         <div className="flex justify-between py-1">
-          <span>Prix net</span>
+          <span>{deps.length ? "Sous-total HT" : "Total HT"}</span>
           <span className="tabular">{formatEUR(p.total)}</span>
         </div>
+        <div className="flex justify-between py-1 text-muted-foreground">
+          <span>TVA</span>
+          <span>0,00 €</span>
+        </div>
+        {deps.length > 0 && (
+          <>
+            <div className="flex justify-between border-t border-border py-1">
+              <span>Total TTC</span>
+              <span className="tabular">{formatEUR(p.total)}</span>
+            </div>
+            {deps.map((d, i) => (
+              <div key={i} className="flex justify-between py-1">
+                <span>{d.label || "Acompte versé"}</span>
+                <span className="tabular">− {formatEUR(Number(d.amount))}</span>
+              </div>
+            ))}
+          </>
+        )}
         <div className="flex justify-between border-t-2 border-ink py-2 text-base font-semibold">
           <span>Net à payer</span>
-          <span className="tabular">{formatEUR(p.total)}</span>
+          <span className="tabular">{formatEUR(netToPay(p.total, deps))}</span>
         </div>
       </div>
 
@@ -134,7 +170,7 @@ export function DocumentPreview(p: Props) {
       {p.type === "quote" && (
         <div className="mt-8 ml-auto h-28 w-72 rounded border border-dashed border-ink/40 p-3 text-[11px]">
           <p>Date et signature du client,</p>
-          <p className="text-muted-foreground">précédées de la mention « Bon pour accord et validation de la proposition »</p>
+          <p className="text-muted-foreground">précédées de la mention « Bon pour accord »</p>
         </div>
       )}
 

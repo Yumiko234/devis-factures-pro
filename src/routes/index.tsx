@@ -5,24 +5,24 @@ import { FileText, ShieldCheck, Users, BarChart3 } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Registre — Propositions de vente et reçus" },
+      { title: "Registre — Devis et factures conformes pour micro-entrepreneurs" },
       {
         name: "description",
         content:
-          "Propositions de vente, reçus et avoirs clairs : numérotation continue, export PDF.",
+          "Devis, factures et avoirs conformes à la loi française : numérotation continue, mentions obligatoires, export PDF.",
       },
-      { property: "og:title", content: "Registre — Propositions de vente et reçus" },
-      { property: "og:description", content: "Des documents clairs et lisibles pour vous et vos clients." },
+      { property: "og:title", content: "Registre — Devis et factures conformes" },
+      { property: "og:description", content: "L'outil de facturation pensé pour les micro-entrepreneurs français." },
     ],
   }),
   component: Index,
 });
 
 const features = [
-  { icon: ShieldCheck, title: "Fiable", text: "Numérotation continue et reçus verrouillés après émission." },
-  { icon: FileText, title: "Proposition de vente → Reçu", text: "Transformez une proposition de vente acceptée en reçu en un clic, émettez un avoir pour annuler." },
+  { icon: ShieldCheck, title: "Conforme", text: "Mentions légales, art. 293 B du CGI, numérotation continue et factures verrouillées après émission." },
+  { icon: FileText, title: "Devis → Facture", text: "Transformez un devis accepté en facture en un clic, émettez un avoir pour annuler." },
   { icon: Users, title: "Clients & catalogue", text: "Votre carnet de clients et vos prestations, réutilisables sur chaque document." },
-  { icon: BarChart3, title: "Pilotage", text: "Chiffre d'affaires, impayés et retards." },
+  { icon: BarChart3, title: "Pilotage", text: "Chiffre d'affaires, impayés, retards et suivi du plafond micro-entreprise." },
 ];
 
 function Index() {
@@ -37,12 +37,12 @@ function Index() {
       <main className="mx-auto max-w-6xl px-6">
         <section className="grid items-center gap-12 py-16 md:grid-cols-2 md:py-24">
           <div>
-            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent">France</p>
+            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent">Micro-entreprise · France</p>
             <h1 className="font-display text-5xl leading-[1.05] md:text-6xl">
-              Des reçus irréprochables, sans y penser.
+              Des factures irréprochables, sans y penser.
             </h1>
             <p className="mt-6 max-w-md text-lg text-muted-foreground">
-              Propositions de vente, reçus et avoirs clairs et lisibles, pour que chacun s'y repère.
+              Devis, factures et avoirs conformes au Code de commerce et au CGI. Vous facturez, Registre s'occupe des mentions.
             </p>
             <div className="mt-8 flex gap-3">
               <Button asChild size="lg">
@@ -53,7 +53,7 @@ function Index() {
           <div className="relative">
             <div className="shadow-paper rotate-1 rounded-sm bg-paper p-8 text-ink">
               <div className="flex justify-between">
-                <span className="font-display text-2xl">Reçu</span>
+                <span className="font-display text-2xl">Facture</span>
                 <span className="font-mono text-sm">F-2026-0042</span>
               </div>
               <div className="mt-6 space-y-2 text-sm">
@@ -68,6 +68,7 @@ function Index() {
                 <span>Total</span>
                 <span className="tabular font-mono">4 050,00 €</span>
               </div>
+              <p className="mt-6 text-xs text-muted-foreground">TVA non applicable, art. 293 B du CGI</p>
             </div>
           </div>
         </section>

@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import type { LineItem } from "./invoice";
+import type { Deposit, LineItem } from "./invoice";
 
 export type Client = Database["public"]["Tables"]["clients"]["Row"];
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type Settings = Database["public"]["Tables"]["company_settings"]["Row"];
-export type DocumentRow = Omit<Database["public"]["Tables"]["documents"]["Row"], "items"> & {
+export type DocumentRow = Omit<Database["public"]["Tables"]["documents"]["Row"], "items" | "deposits"> & {
   items: LineItem[];
+  deposits: Deposit[];
 };
 
 function unwrap<T>(res: { data: T | null; error: { message: string } | null }): T {
