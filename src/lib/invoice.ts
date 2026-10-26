@@ -144,7 +144,7 @@ export function collectedByMonth(docs: RevenueDoc[], year: string): number[] {
   const months = new Array(12).fill(0) as number[];
   for (const d of docs) {
     if (!d.number) continue;
-    if (d.type === "invoice" && d.status === "paid" && inYear(d.paid_at, year)) {
+    if (d.type === "invoice" && d.status === "paid" && d.paid_at && inYear(d.paid_at, year)) {
       const m = Number(d.paid_at.slice(5, 7)) - 1;
       months[m] = (months[m] ?? 0) + Number(d.total);
     } else if (d.type === "credit_note" && inYear(d.issue_date, year)) {
