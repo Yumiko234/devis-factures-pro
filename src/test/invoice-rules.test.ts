@@ -40,3 +40,39 @@ describe("acomptes et mise en forme", () => {
     expect(sanitizeRichText('<b onclick="x">a</b><script>x</script><a href="y"><u>c</u></a>')).toBe("<b>a</b><u>c</u>");
   });
 });
+
+import { billedTotal, collectedByClient, collectedByMonth, collectedTotal, documentsCsv } from "@/lib/invoice";
+
+describe("suivi du chiffre d'affaires", () => {
+  const docs = [
+    { type: "invoice", status: "paid", number: "FA-2026-001", issue_date: "2026-03-10", paid_at: "2026-04-02", total: 1200, client_name: "Durand" },
+    { type: "invoice", status: "paid", number: "FA-2026-002", issue_date: "2026-01-20", paid_at: "2026-01-25", total: 300.5, client_name: "Durand" },
+    { type: "invoice", status: "issued", number: "FA-2026-003", issue_date: "2026-05-01", paid_at: null, total: 500, client_name: "Martin" },
+    { type: "credit_note", status: "issued", number: "AV-2026-001", issue_date: "2026-04-10", paid_at: null, total: -200, client_name: "Durand" },
+    { type: "invoice", status: "paid", number: "FA-2025-009", issue_date: "2025-06-01", paid_at: "2025-06-30", total: 999, client_name: "Durand" },
+  ];
+
+  it("compte les encaissements au mois du paiement, avoirs déduits", () => {
+    const months = collectedByMonth(docs, "2026");
+    expect(months[0]).toBe(300.5);
+    expect(months[3]).toBe(1000);
+    expect(months[1]).toBe(0);
+    expect(collectedTotal(docs, "2026")).toBe(1300.5);
+    expect(collectedTotal(docs, "2025")).toBe(999);
+  });
+
+  it("additionne le CA facturé, avoirs déduits et brouillons exclus", () => {
+    expect(billedTotal(docs, "2026")).toBe(1800.5);
+  });
+
+  it("répartit le CA encaissé par client", () => {
+    expect(collectedByClient(docs, "2026")).toEqual([{ name: "Durand", total: 1300.5 }]);
+  });
+
+  it("exporte un CSV point-virgule avec décimales à la française", () => {
+    const csv = documentsCsv(docs);
+    expect(csv.split("\r\n")[0]).toBe("Type;Numéro;Date d'émission;Client;Montant HT;Statut");
+    expect(csv).toContain("Facture;FA-2026-001;2026-03-10;Durand;1200,00;Payée");
+    expect(csv).toContain("Avoir;AV-2026-001;2026-04-10;Durand;-200,00;Émise");
+  });
+});
