@@ -118,5 +118,82 @@ export function sanitizeRichText(html: string): string {
     });
 }
 
+export interface RevenueDoc {
+  type: string;
+  status: string;
+  number: string | null;
+  issue_date: string;
+  paid_at: string | null;
+  total: number;
+  client_name: string | null;
+}
+
+const inYear = (d: string | null | undefined, year: string) => !!d && d.startsWith(year);
+
+/** CA facturé pour une année : factures émises (numérotées) moins avoirs. */
+export function billedTotal(docs: RevenueDoc[], year: string): number {
+  return round2(
+    docs
+      .filter((d) => d.number && inYear(d.issue_date, year) && (d.type === "invoice" || d.type === "credit_note"))
+      .reduce((s, d) => s + (d.type === "credit_note" ? -Math.abs(Number(d.total)) : Number(d.total)), 0),
+  );
+}
+
+/** Encaissements par mois : factures payées (mois du paiement) moins avoirs émis. */
+export function collectedByMonth(docs: RevenueDoc[], year: string): number[] {
+  const months = new Array(12).fill(0) as number[];
+  for (const d of docs) {
+    if (!d.number) continue;
+    if (d.type === "invoice" && d.status === "paid" && inYear(d.paid_at, year)) {
+      months[Number(d.paid_at!.slice(5, 7)) - 1] += Number(d.total);
+    } else if (d.type === "credit_note" && inYear(d.issue_date, year)) {
+      months[Number(d.issue_date.slice(5, 7)) - 1] -= Math.abs(Number(d.total));
+    }
+  }
+  return months.map(round2);
+}
+
+/** CA encaissé total pour une année. */
+export function collectedTotal(docs: RevenueDoc[], year: string): number {
+  return round2(collectedByMonth(docs, year).reduce((s, v) => s + v, 0));
+}
+
+/** CA encaissé par client pour une année, trié du plus gros au plus petit. */
+export function collectedByClient(docs: RevenueDoc[], year: string): { name: string; total: number }[] {
+  const byClient = new Map<string, number>();
+  for (const d of docs) {
+    if (!d.number) continue;
+    if (d.type === "invoice" && d.status === "paid" && inYear(d.paid_at, year)) {
+      const name = d.client_name || "Client inconnu";
+      byClient.set(name, (byClient.get(name) ?? 0) + Number(d.total));
+    } else if (d.type === "credit_note" && inYear(d.issue_date, year)) {
+      const name = d.client_name || "Client inconnu";
+      byClient.set(name, (byClient.get(name) ?? 0) - Math.abs(Number(d.total)));
+    }
+  }
+  return [...byClient.entries()].map(([name, total]) => ({ name, total: round2(total) })).sort((a, b) => b.total - a.total);
+}
+
+/** Export CSV (séparateur « ; », décimales à la française, adapté à Excel). */
+export function documentsCsv(docs: RevenueDoc[]): string {
+  const esc = (v: string) => (/[;"\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const rows = [["Type", "Numéro", "Date d'émission", "Client", "Montant HT", "Statut"].join(";")];
+  for (const d of docs) {
+    rows.push(
+      [
+        DOC_LABEL[d.type as DocType] ?? d.type,
+        d.number ?? "",
+        d.issue_date,
+        d.client_name ?? "",
+        (Number(d.total) || 0).toFixed(2).replace(".", ","),
+        STATUS_LABEL[displayStatus({ type: d.type, status: d.status, due_date: null })] ?? d.status,
+      ]
+        .map(esc)
+        .join(";"),
+    );
+  }
+  return rows.join("\r\n");
+}
+
 export const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
