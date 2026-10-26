@@ -145,12 +145,14 @@ export function collectedByMonth(docs: RevenueDoc[], year: string): number[] {
   for (const d of docs) {
     if (!d.number) continue;
     if (d.type === "invoice" && d.status === "paid" && inYear(d.paid_at, year)) {
-      months[Number(d.paid_at!.slice(5, 7)) - 1] += Number(d.total);
+      const m = Number(d.paid_at.slice(5, 7)) - 1;
+      months[m] = (months[m] ?? 0) + Number(d.total);
     } else if (d.type === "credit_note" && inYear(d.issue_date, year)) {
-      months[Number(d.issue_date.slice(5, 7)) - 1] -= Math.abs(Number(d.total));
+      const m = Number(d.issue_date.slice(5, 7)) - 1;
+      months[m] = (months[m] ?? 0) - Math.abs(Number(d.total));
     }
   }
-  return months.map(round2);
+  return months.map((v) => round2(v ?? 0));
 }
 
 /** CA encaissé total pour une année. */

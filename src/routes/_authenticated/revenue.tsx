@@ -173,7 +173,7 @@ function RevenuePage() {
                   <td className="px-5 py-2">
                     {yearDocs.filter((d) => d.issue_date.slice(5, 7) === String(i + 1).padStart(2, "0")).length}
                   </td>
-                  <td className="tabular px-5 py-2 text-right">{formatEUR(monthly[i])}</td>
+                  <td className="tabular px-5 py-2 text-right">{formatEUR(monthly[i] ?? 0)}</td>
                 </tr>
               ))}
             </tbody>
